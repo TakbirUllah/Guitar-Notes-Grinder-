@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Guitar Note Trainer — Neon Gothic Core</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=VT323&display=swap');
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background:
+      linear-gradient(135deg, #0c0000 0%, #220000 70%, #0a0a0a 100%),
+      url('alexilaiho.jpg') repeat;
+    background-blend-mode: multiply;
+    color: #f1d8d8;
+    font-family: 'VT323', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    transition: background-color 0.10s ease;
+  }
+
+  .container {
+    background: rgba(18, 10, 10, 0.95);
+    border: 4px double #8b0000;
+    box-shadow:
+      inset 0 0 20px #7f0000,
+      0 0 30px #400000;
+    border-radius: 12px;
+    width: 480px;
+    max-width: 90vw;
+    padding: 40px 35px;
+    text-align: center;
+    position: relative;
+    transition: box-shadow 0.8s ease;
+  }
+
+  h1 {
+    font-family: 'UnifrakturCook', cursive;
+    font-size: 3.5rem;
+    color: #c62828;
+    text-shadow:
+      0 0 10px #aa0000,
+      0 0 20px #ff0000;
+    margin: 0 0 25px 0;
+    user-select: none;
+  }
+
+  #question {
+    font-size: 1.6rem;
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+    color: #f9c0c0;
+    text-shadow: 0 0 8px #330000;
+  }
+
+  #options {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  button.option-btn {
+    background:
+      linear-gradient(145deg, #3b0000, #1a0000);
+    border: 3px solid #600000;
+    border-radius: 10px;
+    color: #ffaaaa;
+    font-family: 'VT323', monospace;
+    font-size: 1.3rem;
+    padding: 14px 28px;
+    cursor: pointer;
+    box-shadow:
+      inset 0 0 8px #aa0000,
+      0 0 10px #8b0000;
+    text-transform: uppercase;
+    flex-grow: 1;
+    min-width: 100px;
+    user-select: none;
+    transition: all 0.3s ease;
+  }
+  button.option-btn:hover:not(:disabled) {
+    background:
+      linear-gradient(145deg, #7f0000, #4b0000);
+    color: #fff0f0;
+    box-shadow:
+      inset 0 0 12px #ff4444,
+      0 0 15px #ff2222;
+    transform: scale(1.1);
+  }
+  button.option-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+
+  button.option-btn.correct {
+    background: #005500;
+    border-color: #00cc00;
+    box-shadow:
+      inset 0 0 12px #00ff00,
+      0 0 20px #00ff00;
+    color: #c0ffc0;
+  }
+  button.option-btn.wrong {
+    background: #330000;
+    border-color: #cc0000;
+    box-shadow:
+      inset 0 0 12px #ff0000,
+      0 0 20px #ff0000;
+    color: #ffcccc;
+  }
+
+  .feedback {
+    margin-top: 28px;
+    font-family: 'VT323', monospace;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: #ff5555;
+    text-shadow: 0 0 10px #bb2222;
+    min-height: 30px;
+  }
+
+  /* Full container glow effect on correct/wrong */
+  .container.correct-glow {
+    box-shadow:
+      0 0 40px 10px #00ff00cc,
+      inset 0 0 25px #00ff00cc;
+    border-color: #00cc00;
+    transition: box-shadow 0.5s ease;
+  }
+  .container.wrong-glow {
+    box-shadow:
+      0 0 40px 10px #ff0000cc,
+      inset 0 0 25px #ff0000cc;
+    border-color: #cc0000;
+    transition: box-shadow 0.5s ease;
+  }
+
+  @media (max-width: 480px) {
+    .container {
+      padding: 30px 20px;
+      width: 95vw;
+    }
+    button.option-btn {
+      font-size: 1.6rem;
+      padding: 18px 0;
+      min-width: 45%;
+      flex-grow: 0;
+    }
+    h1 {
+      font-size: 2.8rem;
+    }
+    #question {
+      font-size: 1.3rem;
+    }
+    .feedback {
+      font-size: 1.2rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container" id="container">
+    <h1>Guitar Note Trainer</h1>
+    <p id="question">Loading question...</p>
+    <div id="options"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+<script>
+  const strings = [
+    { name: "Low E", notes: ["E", "F", "Fs", "G", "Gs", "A", "As", "B", "C", "Cs", "D", "Ds", "E"] },
+    { name: "A",    notes: ["A", "As", "B", "C", "Cs", "D", "Ds", "E", "F", "Fs", "G", "Gs", "A"] },
+    { name: "D",    notes: ["D", "Ds", "E", "F", "Fs", "G", "Gs", "A", "As", "B", "C", "Cs", "D"] },
+    { name: "G",    notes: ["G", "Gs", "A", "As", "B", "C", "Cs", "D", "Ds", "E", "F", "Fs", "G"] },
+    { name: "B",    notes: ["B", "C", "Cs", "D", "Ds", "E", "F", "Fs", "G", "Gs", "A", "As", "B"] },
+    { name: "High E",notes: ["E", "F", "Fs", "G", "Gs", "A", "As", "B", "C", "Cs", "D", "Ds", "E"] },
+  ];
+
+  function shuffle(array) {
+    for (let i = array.length -1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  const container = document.getElementById('container');
+  const feedback = document.getElementById('feedback');
+
+  function generateQuestion() {
+    feedback.textContent = "";
+    container.classList.remove("correct-glow", "wrong-glow");
+
+    const stringIndex = Math.floor(Math.random() * strings.length);
+    const string = strings[stringIndex];
+    const fret = Math.floor(Math.random() * 13);
+    const note = string.notes[fret];
+    const correctFret = fret;
+
+    const optionsSet = new Set();
+    optionsSet.add(correctFret);
+    while (optionsSet.size < 4) {
+      optionsSet.add(Math.floor(Math.random() * 13));
+    }
+    const options = Array.from(optionsSet);
+    shuffle(options);
+
+    const qElem = document.getElementById("question");
+    qElem.innerHTML = `Where is <strong>${note.replace('s', '#')}</strong> on the <strong>${string.name}</strong> string?`;
+
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+      btn.classList.add("option-btn");
+      btn.onclick = () => {
+        [...optionsDiv.children].forEach(b => b.disabled = true);
+
+        if (opt === correctFret) {
+          btn.classList.add("correct");
+          container.classList.add("correct-glow");
+          feedback.textContent = "Correct!";
+        } else {
+          btn.classList.add("wrong");
+          container.classList.add("wrong-glow");
+          [...optionsDiv.children].forEach(b => {
+            if (parseInt(b.textContent) === correctFret) {
+              b.classList.add("correct");
+            }
+          });
+          feedback.textContent = `Wrong! The correct fret was ${correctFret}.`;
+        }
+
+        setTimeout(() => {
+          generateQuestion();
+        }, 3000);
+      };
+      optionsDiv.appendChild(btn);
+    });
+  }
+
+  generateQuestion();
+</script>
+</body>
+</html>
